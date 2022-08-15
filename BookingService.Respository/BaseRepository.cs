@@ -12,7 +12,7 @@ namespace BookingService.Respository
         public BaseRepository(BookingContext context)
             : base()
         {
-            _context = context;
+            this._context = context;
         }
         public Task<Guid> Create(TEntity entity)
         {
@@ -28,5 +28,8 @@ namespace BookingService.Respository
         {
             throw new NotImplementedException();
         }
+
+
+
     }
 }

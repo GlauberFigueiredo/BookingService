@@ -13,7 +13,11 @@ namespace BookingService.Respository.Context
         public BookingContext(DbContextOptions<BookingContext> options)
           : base(options)
         { }
-
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder
+                .UseLazyLoadingProxies();
+        }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
     }

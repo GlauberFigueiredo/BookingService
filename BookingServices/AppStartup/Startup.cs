@@ -1,4 +1,5 @@
-﻿using BookingService.Respository.Context;
+﻿using BookingService.AppStartup;
+using BookingService.Respository.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookingServices
@@ -14,12 +15,18 @@ namespace BookingServices
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<BookingContext>(opt => opt.UseInMemoryDatabase("InMemoryDatabase"));
 
             services.AddControllers();
 
             services.AddEndpointsApiExplorer();
+
             services.AddSwaggerGen();
+
+            AutomapperStartupConfig.AddAutoMapper(services);
+
+            AppServicesRegistration.RegisterServices(services);
+
+            services.AddDbContext<BookingContext>(opt => opt.UseInMemoryDatabase("InMemoryDatabase"));
         }
 
         public void Configure(WebApplication app, IWebHostEnvironment env)
@@ -34,8 +41,11 @@ namespace BookingServices
 
             app.UseAuthorization();
 
-            var context = app.Services.GetService<BookingContext>();
-            StartupExtensions.PopulateInMemoryDatabase(context);
+            using (var scope = app.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<BookingContext>();
+                StartupExtensions.PopulateInMemoryDatabase(dbContext);
+            }
 
             app.MapControllers();
         }
@@ -71,7 +81,7 @@ namespace BookingServices
         {
             var room1 = new BookingService.Model.Entities.Room
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("24c7c278-110b-4bc8-932d-739b677cec77"),
                 Floor = 1,
                 Number = 1,
                 Type = BookingService.Model.Enums.RoomType.DOUBLE,
@@ -79,7 +89,7 @@ namespace BookingServices
             };
             var room2 = new BookingService.Model.Entities.Room
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("ccd5f291-25af-4802-bfc3-339929c9b5d9"),
                 Floor = 2,
                 Number = 2,
                 Type = BookingService.Model.Enums.RoomType.SINGLE,
@@ -87,7 +97,7 @@ namespace BookingServices
             };
             var room3 = new BookingService.Model.Entities.Room
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("37fb6cc7-313b-4b37-867d-2de3562514a9"),
                 Floor = 3,
                 Number = 3,
                 Type = BookingService.Model.Enums.RoomType.SUITE,
@@ -96,45 +106,56 @@ namespace BookingServices
 
             var reservation1 = new BookingService.Model.Entities.Reservation
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("f1a7c449-323b-492c-b902-b43150ab0b7d"),
                 StartDate = DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
                 EndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(5)),
                 Room = room2,
+                RoomId = room2.Id,
                 Status = BookingService.Model.Enums.ReservationStatus.ACTIVE
             };
             var reservation2 = new BookingService.Model.Entities.Reservation
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("329def49-4d09-4bfb-96ae-68ee5878d313"),
                 StartDate = DateOnly.FromDateTime(DateTime.Now.AddDays(7)),
                 EndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(8)),
                 Room = room2,
+                RoomId = room2.Id,
                 Status = BookingService.Model.Enums.ReservationStatus.ACTIVE
             };
             var reservation3 = new BookingService.Model.Entities.Reservation
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("e2b76ff4-6bb9-4a11-9524-557a4e2f100d"),
                 StartDate = DateOnly.FromDateTime(DateTime.Now.AddDays(13)),
                 EndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(16)),
                 Room = room2,
+                RoomId = room2.Id,
                 Status = BookingService.Model.Enums.ReservationStatus.ACTIVE
             };
             var reservation4 = new BookingService.Model.Entities.Reservation
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("a8301865-454e-4d92-b60f-1f23bbfe7fd2"),
                 StartDate = DateOnly.FromDateTime(DateTime.Now.AddDays(17)),
                 EndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(18)),
                 Room = room2,
+                RoomId = room2.Id,
                 Status = BookingService.Model.Enums.ReservationStatus.CANCELLED
             };
             var reservation5 = new BookingService.Model.Entities.Reservation
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("656208a2-639a-4816-888a-e5e53f111d24"),
                 StartDate = DateOnly.FromDateTime(DateTime.Now.AddDays(23)),
                 EndDate = DateOnly.FromDateTime(DateTime.Now.AddDays(25)),
                 Room = room2,
+                RoomId = room2.Id,
                 Status = BookingService.Model.Enums.ReservationStatus.ACTIVE
             };
-            context.Rooms.Add(room1);
+
+            var roomsList = new List<BookingService.Model.Entities.Room> { room1, room2, room3};
+            var reservationsList = new List<BookingService.Model.Entities.Reservation> { reservation1, reservation2, reservation3, reservation4, reservation5 };
+
+            context.Rooms.AddRange(roomsList);
+            context.Reservations.AddRange(reservationsList);
+
             context.SaveChanges();
 
         }
