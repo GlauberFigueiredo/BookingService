@@ -11,8 +11,16 @@ namespace BookingService.Service.Contracts
     {
         Task<List<ReservationViewModel>> GetAll();
 
-        Task<ReservationViewModel> CreateNew(Guid roomId,
-                                             DateOnly startDate,
+        Task<ReservationViewModel> CreateNew(DateOnly startDate,
                                              DateOnly endDate);
+
+        Task<ReservationViewModel> Update(Guid reservationId,
+                                          DateOnly startDate,
+                                          DateOnly endDate);
+
+        Task<ReservationViewModel> Cancel(Guid reservationId);
+
+        Task<bool> IsAvailable(DateOnly startDate,
+                               DateOnly endDate);
     }
 }

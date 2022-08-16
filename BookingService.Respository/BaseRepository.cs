@@ -1,9 +1,11 @@
 ﻿using BookingService.Model.Entities;
 using BookingService.Respository.Contracts;
 using BookingService.Respository.Context;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BookingService.Respository
 {
+    [ExcludeFromCodeCoverage]
     public abstract class BaseRepository<TEntity> : IBaseRepository<TEntity>
         where TEntity : BaseEntity
     {
@@ -14,22 +16,5 @@ namespace BookingService.Respository
         {
             this._context = context;
         }
-        public Task<Guid> Create(TEntity entity)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Delete(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task Update(TEntity entity)
-        {
-            throw new NotImplementedException();
-        }
-
-
-
     }
 }

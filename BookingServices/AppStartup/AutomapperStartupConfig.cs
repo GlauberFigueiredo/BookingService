@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BookingService.AppStartup
 {
+    [ExcludeFromCodeCoverage]
     public static class AutomapperStartupConfig
     {
         public static List<Profile> ListOfAutomapperProfiles => new List<Profile>()

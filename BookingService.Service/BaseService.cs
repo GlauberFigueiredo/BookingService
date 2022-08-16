@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using NLog;
+using System.Diagnostics.CodeAnalysis;
 
 namespace BookingService.Service
 {
+    [ExcludeFromCodeCoverage]
     public abstract class BaseService
     {
         protected static Logger _logger = LogManager.GetCurrentClassLogger();

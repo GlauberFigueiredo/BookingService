@@ -10,7 +10,6 @@ namespace BookingService.Respository
         public ReservationRepository(BookingContext context)
             : base(context)
         {
-
         }
 
         public async Task<List<Reservation>> GetAll()
@@ -19,12 +18,16 @@ namespace BookingService.Respository
                 .ToListAsync();
             return reservations;
         }
+        
+        public async Task<Reservation> GetById(Guid reservationId)
+        {
+            return await _context.Reservations.FindAsync(reservationId);
+        }
 
-        public async Task<List<Reservation>> ListActiveByRoomAndDateRangeOverlap(Guid roomId, DateOnly startDate, DateOnly endDate)
+        public async Task<List<Reservation>> ListActiveByRoomAndDateRangeOverlap(DateOnly startDate, DateOnly endDate)
         {
             var reservations = await _context.Reservations
-                .Where(x => x.RoomId == roomId)
-                .Where(y => y.StartDate <= endDate && startDate <= y.EndDate )
+                .Where(y => y.StartDate <= endDate && startDate <= y.EndDate)
                 .Where(z => z.Status == Model.Enums.ReservationStatus.ACTIVE)
                 .ToListAsync();
 
@@ -33,20 +36,19 @@ namespace BookingService.Respository
 
         public async Task<Reservation> Create(Reservation reservation)
         {
-            if (GetById(reservation.Id) == null)
-            {
-                var result = await _context.AddAsync(reservation);
-                _context.SaveChangesAsync();
-            }
+            await _context.AddAsync(reservation);
+            await _context.SaveChangesAsync();
 
-
-            return new Reservation();
-
+            return reservation;
         }
 
-        private async Task<Reservation> GetById(Guid reservationId)
+        public async Task<Reservation> Update(Reservation reservation)
         {
-            return await _context.Reservations.FindAsync(reservationId);
+            var entity = _context.Reservations.Attach(reservation);
+            entity.State = EntityState.Modified;
+            await _context.SaveChangesAsync();
+
+            return reservation;
         }
 
     }

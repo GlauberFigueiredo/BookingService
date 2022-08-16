@@ -3,25 +3,22 @@ using BookingService.Service.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using BookingService.Model.ViewModels;
+using BookingService.Shared;
 
 namespace BookingService.Controllers
 {
     [Route("reservations")]
     public class ReservationController : ControllerBase
     {
-        #region Properties
         private readonly IReservationService _reservationService;
-        #endregion
 
-        #region Constructor
         public ReservationController(IReservationService reservationService)
         {
             this._reservationService = reservationService;
         }
-        #endregion
 
         [HttpGet]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> ListAll()
         {
             try
             {
@@ -29,7 +26,60 @@ namespace BookingService.Controllers
                 {
                     data = await _reservationService.GetAll()
                 };
+
                 return Ok(response);
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(500, FormatExceptionToReturn(exception));
+            }
+        }
+
+        [HttpPost]
+        [Route("check_availability")]
+        public async Task<IActionResult> CheckAvailability([FromQuery] DateTime startDate,
+                                                   [FromQuery] DateTime endDate)
+        {
+            try
+            {
+                var startDateOnly = DateOnlyConverter.DateTimeToDateOnlyConverter(startDate);
+                var endDateOnly = DateOnlyConverter.DateTimeToDateOnlyConverter(endDate);
+
+                var response = new
+                {
+                    data = await _reservationService.IsAvailable(startDateOnly, endDateOnly)
+                };
+                return Ok(response);
+            }
+            catch (BadRequestException exception)
+            {
+                return BadRequest(exception.Message);
+            }
+            catch (Exception exception)
+            {
+                return StatusCode(500, FormatExceptionToReturn(exception));
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromQuery] DateTime startDate,
+                                                [FromQuery] DateTime endDate)
+        {
+            try
+            {
+                var startDateOnly = DateOnlyConverter.DateTimeToDateOnlyConverter(startDate);
+                var endDateOnly = DateOnlyConverter.DateTimeToDateOnlyConverter(endDate);
+
+                var response = new
+                {
+                    data = await _reservationService.CreateNew(startDateOnly, endDateOnly)
+                };
+                //TODO check return
+                return Created("", response);
+            }
+            catch (BadRequestException exception)
+            {
+                return BadRequest(exception.Message);
             }
             catch (Exception exception)
             {
@@ -39,18 +89,27 @@ namespace BookingService.Controllers
 
         [HttpPost]
         [Route("{reservationId}")]
-        public async Task<IActionResult> Update([FromRoute] Guid reservationId)
+        public async Task<IActionResult> Modify([FromRoute] Guid reservationId,
+                                                [FromQuery] DateTime startDate,
+                                                [FromQuery] DateTime endDate)
         {
             if (reservationId == Guid.Empty)
-                return BadRequest($"BadRequest: An invalid Id was informed.");
-
+                return BadRequest($"BadRequest: An invalid reservation was informed.");
+            
             try
             {
+                var startDateOnly = DateOnlyConverter.DateTimeToDateOnlyConverter(startDate);
+                var endDateOnly = DateOnlyConverter.DateTimeToDateOnlyConverter(endDate);
+
                 var response = new
                 {
-                    data = await _reservationService.GetAll()
+                    data = await _reservationService.Update(reservationId, startDateOnly, endDateOnly)
                 };
                 return Ok(response);
+            }
+            catch (BadRequestException exception)
+            {
+                return BadRequest(exception.Message);
             }
             catch (Exception exception)
             {
@@ -59,31 +118,29 @@ namespace BookingService.Controllers
         }
 
         [HttpPost]
-        [Route("new/{roomId}")]
-        public async Task<IActionResult> Create([FromRoute] Guid roomId,
-            [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate)
+        [Route("cancel/{reservationId}")]
+        public async Task<IActionResult> Cancel([FromRoute] Guid reservationId)
         {
-            if (roomId == Guid.Empty)
-                return BadRequest($"BadRequest: An invalid room was informed.");
-            if (string.IsNullOrEmpty(startDate.ToString())
-                || string.IsNullOrEmpty(endDate.ToString()))
-                return BadRequest($"BadRequest: An invalid date range was informed.");
+            if (reservationId == Guid.Empty)
+                return BadRequest($"BadRequest: An invalid Id was informed.");
 
             try
             {
                 var response = new
                 {
-                    data = await _reservationService.CreateNew(roomId, DateOnly.FromDateTime(startDate), DateOnly.FromDateTime(endDate))
+                    data = await _reservationService.Cancel(reservationId)
                 };
-                return Created("", response);
+                return Ok(response);
+            }
+            catch (BadRequestException exception)
+            {
+                return BadRequest(exception.Message);
             }
             catch (Exception exception)
             {
                 return StatusCode(500, FormatExceptionToReturn(exception));
             }
         }
-
 
         private string FormatExceptionToReturn(Exception exception)
         {
@@ -95,7 +152,5 @@ namespace BookingService.Controllers
 
             return errorResponse.ToString();
         }
-
-
     }
 }

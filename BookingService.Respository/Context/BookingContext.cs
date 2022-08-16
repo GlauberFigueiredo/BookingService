@@ -2,12 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BookingService.Respository.Context
 {
+    [ExcludeFromCodeCoverage]
     public class BookingContext : DbContext
     {
         public BookingContext(DbContextOptions<BookingContext> options)
@@ -18,7 +20,6 @@ namespace BookingService.Respository.Context
             optionsBuilder
                 .UseLazyLoadingProxies();
         }
-        public DbSet<Room> Rooms { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
     }
 }

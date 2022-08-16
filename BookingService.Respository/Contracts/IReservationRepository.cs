@@ -10,6 +10,10 @@ namespace BookingService.Respository.Contracts
     public interface IReservationRepository
     {
         Task<List<Reservation>> GetAll();
-        Task<List<Reservation>> ListActiveByRoomAndDateRangeOverlap(Guid roomId, DateOnly startDate, DateOnly endDate);
+        Task<Reservation> GetById(Guid reservationId);
+        Task<Reservation> Create(Reservation reservation);
+        Task<Reservation> Update(Reservation reservation);
+        Task<List<Reservation>> ListActiveByRoomAndDateRangeOverlap(DateOnly startDate,
+                                                                    DateOnly endDate);
     }
 }
