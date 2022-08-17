@@ -24,6 +24,7 @@ namespace BookingService.Service
             this._reservationRepository = reservationRepository;
         }
 
+
         public async Task<List<ReservationViewModel>> GetAll()
         {
             var reservations = await _reservationRepository.GetAll();
@@ -117,7 +118,7 @@ namespace BookingService.Service
         {
             var overlapingReservations = await _reservationRepository.ListActiveByRoomAndDateRangeOverlap(startDate, endDate);
             if (overlapingReservations.Count > 0)
-                throw new OverbookingException($"Room is already booked for the given period.");
+                throw new OverbookingException($"Room is already booked during the given period.");
         }
         #endregion
     }

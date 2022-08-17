@@ -15,6 +15,7 @@ namespace BookingService.Respository.Context
         public BookingContext(DbContextOptions<BookingContext> options)
           : base(options)
         { }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
